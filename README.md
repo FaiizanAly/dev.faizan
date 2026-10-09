@@ -2,6 +2,8 @@
 
 # ✦ dev.faizan — Personal Portfolio v1
 
+[LIVE SITE](https://dev-faizan.vercel.app/)
+
 ### *"Clean code. Sharp design. Built from scratch."*
 
 [![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-faizanaly.vercel.app-e63946?style=for-the-badge&logoColor=white)](https://faizanaly.vercel.app/)
