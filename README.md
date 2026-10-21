@@ -123,7 +123,7 @@ python -m http.server 8080
 
 <div align="center">
 
-**© 2026 Faizan Ali** &nbsp;·&nbsp; Built with ❤️ and clean code &nbsp;·&nbsp; [faizanaly.vercel.app](https://faizanaly.vercel.app/)
+**© 2026 Faizan Ali** &nbsp;·&nbsp; Built with ❤️ and clean code &nbsp;·&nbsp; [dev-faizan.vercel.app](https://dev-faizan.vercel.app/)
 
 ⭐ *Star this repo if you found it helpful!*
 
