@@ -152,13 +152,12 @@ h1, h2, h3, h4, h5, h6 {
 
 .section-tag {
     display: inline-block;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 600;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
     color: var(--red);
-    text-transform: uppercase;
     margin-bottom: 12px;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font);
 }
 
 .section-title {
@@ -1108,6 +1107,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .project-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
     margin-top: 4px;
 }
