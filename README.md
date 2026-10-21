@@ -1,6 +1,6 @@
 <div align="center">
 
-# ✦ dev.faizan — Personal Portfolio v1
+# ✦ dev-faizan — Personal Portfolio ✦
 
 ### *"Clean code. Sharp design. Built from scratch."*
 
