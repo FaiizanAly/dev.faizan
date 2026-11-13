@@ -17,55 +17,82 @@ document.addEventListener('DOMContentLoaded', () => {
     const typewriterEl   = document.getElementById('typewriter');
 
     // =============================================
-    // 1. STICKY NAVBAR + BACK-TO-TOP VISIBILITY
+    // 1. STICKY NAVBAR + BACK-TO-TOP VISIBILITY + ACTIVE NAV LINK
     // =============================================
+    const sections = document.querySelectorAll('section[id]');
+    let sectionCache = [];
+
+    function updateSectionCache() {
+        sectionCache = Array.from(sections).map(sec => ({
+            id: sec.getAttribute('id'),
+            top: sec.offsetTop,
+            bottom: sec.offsetTop + sec.offsetHeight
+        }));
+    }
+
+    updateSectionCache();
+
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(updateSectionCache, 200);
+    }, { passive: true });
+
     let ticking = false;
+    let isNavbarScrolled = false;
+    let isBackToTopVisible = false;
+    let currentActiveNavId = '';
+
+    function updateActiveNavLink(scrollY) {
+        const scrollPos = scrollY + 140;
+        let matchedId = '';
+        for (let i = 0; i < sectionCache.length; i++) {
+            const sec = sectionCache[i];
+            if (scrollPos >= sec.top && scrollPos < sec.bottom) {
+                matchedId = sec.id;
+                break;
+            }
+        }
+
+        if (matchedId !== currentActiveNavId) {
+            currentActiveNavId = matchedId;
+            navLinks.forEach(link => {
+                link.classList.toggle('active', link.getAttribute('href') === `#${matchedId}`);
+            });
+        }
+    }
 
     window.addEventListener('scroll', () => {
         if (!ticking) {
             window.requestAnimationFrame(() => {
                 const scrollY = window.scrollY;
 
-                // Navbar state
-                navbar.classList.toggle('scrolled', scrollY > 60);
-
-                // Back-to-top button
-                if (backToTopBtn) {
-                    backToTopBtn.classList.toggle('visible', scrollY > 500);
+                // Navbar state (only toggle when threshold state changes)
+                const shouldBeScrolled = scrollY > 60;
+                if (shouldBeScrolled !== isNavbarScrolled) {
+                    navbar.classList.toggle('scrolled', shouldBeScrolled);
+                    isNavbarScrolled = shouldBeScrolled;
                 }
 
-                // Active nav link highlight
-                highlightActiveLink();
+                // Back-to-top button (only toggle when threshold state changes)
+                if (backToTopBtn) {
+                    const shouldBeTopVis = scrollY > 500;
+                    if (shouldBeTopVis !== isBackToTopVisible) {
+                        backToTopBtn.classList.toggle('visible', shouldBeTopVis);
+                        isBackToTopVisible = shouldBeTopVis;
+                    }
+                }
+
+                // Active nav link highlight using cached offsets (zero forced reflow)
+                updateActiveNavLink(scrollY);
+
                 ticking = false;
             });
             ticking = true;
         }
     }, { passive: true });
 
-    // =============================================
-    // 2. ACTIVE NAV LINK ON SCROLL
-    // =============================================
-    function highlightActiveLink() {
-        const sections = document.querySelectorAll('section[id]');
-        const scrollPos = window.scrollY + 140;
-
-        sections.forEach(section => {
-            const sTop = section.offsetTop;
-            const sH   = section.offsetHeight;
-            const sId  = section.getAttribute('id');
-
-            if (scrollPos >= sTop && scrollPos < sTop + sH) {
-                navLinks.forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href') === `#${sId}`) {
-                        link.classList.add('active');
-                    }
-                });
-            }
-        });
-    }
-
-    highlightActiveLink();
+    updateActiveNavLink(window.scrollY);
 
     // =============================================
     // 3. MOBILE MENU TOGGLE
@@ -131,15 +158,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =============================================
-    // 5. TYPEWRITER EFFECT
+    // 5. TYPEWRITER EFFECT & HERO VISIBILITY GUARD
     // =============================================
+    const heroSection = document.getElementById('hero');
+    let heroVisible = true;
+
+    if (heroSection && 'IntersectionObserver' in window) {
+        const heroObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                heroVisible = entry.isIntersecting;
+                const blobs = heroSection.querySelector('.hero-blobs');
+                if (blobs) {
+                    blobs.style.animationPlayState = heroVisible ? 'running' : 'paused';
+                }
+            });
+        }, { threshold: 0 });
+        heroObserver.observe(heroSection);
+    }
+
     if (typewriterEl) {
         const roles = [
-            'Java Developer',
+            'Python Backend Developer',
+            'AI Automation Enthusiast',
             'Web Developer',
             'MCA Student',
-            'Software Engineer',
-            'GenAI Enthusiast',
+            'Software Developer',
         ];
 
         let roleIndex  = 0;
@@ -148,6 +191,11 @@ document.addEventListener('DOMContentLoaded', () => {
         let typeTimer  = null;
 
         function type() {
+            if (!heroVisible) {
+                typeTimer = setTimeout(type, 500);
+                return;
+            }
+
             const currentRole = roles[roleIndex];
 
             if (isDeleting) {
@@ -172,9 +220,9 @@ document.addEventListener('DOMContentLoaded', () => {
             typeTimer = setTimeout(type, speed);
         }
 
-        // Pause typewriter when tab is hidden (performance)
+        // Pause typewriter when tab is hidden or hero is offscreen (performance)
         document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
+            if (document.hidden || !heroVisible) {
                 clearTimeout(typeTimer);
             } else {
                 typeTimer = setTimeout(type, 300);
@@ -336,5 +384,61 @@ document.addEventListener('DOMContentLoaded', () => {
             img.dispatchEvent(new Event('error'));
         }
     });
+
+    // =============================================
+    // 10. RESUME PASSWORD NOTIFICATION DIALOG
+    // =============================================
+    const resumeDownloadBtn = document.getElementById('resume-download-btn');
+    const resumeDialog      = document.getElementById('resume-dialog');
+    const resumeDialogClose = document.getElementById('resume-dialog-close');
+    const resumeDialogX     = document.getElementById('resume-dialog-x');
+
+    function openResumeDialog() {
+        if (!resumeDialog) return;
+        resumeDialog.removeAttribute('hidden');
+        window.requestAnimationFrame(() => {
+            resumeDialog.classList.add('active');
+            if (resumeDialogClose) {
+                resumeDialogClose.focus();
+            }
+        });
+    }
+
+    function closeResumeDialog() {
+        if (!resumeDialog || !resumeDialog.classList.contains('active')) return;
+        resumeDialog.classList.remove('active');
+        setTimeout(() => {
+            resumeDialog.setAttribute('hidden', '');
+            if (resumeDownloadBtn) {
+                resumeDownloadBtn.focus();
+            }
+        }, 260);
+    }
+
+    if (resumeDownloadBtn && resumeDialog) {
+        resumeDownloadBtn.addEventListener('click', () => {
+            openResumeDialog();
+        });
+
+        if (resumeDialogClose) {
+            resumeDialogClose.addEventListener('click', closeResumeDialog);
+        }
+
+        if (resumeDialogX) {
+            resumeDialogX.addEventListener('click', closeResumeDialog);
+        }
+
+        resumeDialog.addEventListener('click', (e) => {
+            if (e.target === resumeDialog) {
+                closeResumeDialog();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && resumeDialog.classList.contains('active')) {
+                closeResumeDialog();
+            }
+        });
+    }
 
 });

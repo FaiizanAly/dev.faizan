@@ -41,8 +41,8 @@
     --radius-xl:      32px;
 
     /* Transition */
-    --transition:     all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    --transition-slow:all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    --transition:     transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+    --transition-slow:transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
 
     /* Section padding */
     --section-pad:    100px;
@@ -130,8 +130,8 @@ h1, h2, h3, h4, h5, h6 {
 /* Glass Card */
 .glass-card {
     background: var(--card-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-lg);
     transition: var(--transition);
@@ -140,7 +140,7 @@ h1, h2, h3, h4, h5, h6 {
 .glass-card:hover {
     background: var(--card-bg-hover);
     border-color: var(--card-border-hover);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(230, 57, 70, 0.08);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(230, 57, 70, 0.08);
     transform: translateY(-2px);
 }
 
@@ -257,14 +257,16 @@ h1, h2, h3, h4, h5, h6 {
 ============================================= */
 .reveal {
     opacity: 0;
-    transform: translateY(32px);
-    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-                transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(24px);
+    will-change: opacity, transform;
+    transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .reveal.visible {
     opacity: 1;
     transform: translateY(0);
+    will-change: auto;
 }
 
 /* Staggered delays for sibling reveals */
@@ -391,8 +393,10 @@ h1, h2, h3, h4, h5, h6 {
 .blob {
     position: absolute;
     border-radius: 50%;
-    filter: blur(90px);
+    filter: blur(60px);
     opacity: 0.5;
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
 }
 
 .blob-1 {
@@ -482,9 +486,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @keyframes pulse {
-    0%   { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
-    70%  { transform: scale(1);    box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+    0%   { transform: scale(0.92); opacity: 0.75; }
+    50%  { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(0.92); opacity: 0.75; }
 }
 
 /* Hero Name */
@@ -612,15 +616,17 @@ h1, h2, h3, h4, h5, h6 {
     content: '';
     position: absolute;
     top: 0;
-    left: -100%;
+    left: 0;
     width: 100%;
     height: 100%;
     background: linear-gradient(to right, transparent, rgba(230, 57, 70, 0.8), transparent);
+    transform: translateX(-100%);
     animation: scrollGlow 2s ease-in-out infinite;
 }
 
 @keyframes scrollGlow {
-    to { left: 100%; }
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
 }
 
 /* =============================================
@@ -978,14 +984,11 @@ h1, h2, h3, h4, h5, h6 {
 .project-art-bg {
     position: absolute;
     inset: 0;
-    background-size: 300% 300%;
-    animation: gradShift 6s ease infinite;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
 }
 
-@keyframes gradShift {
-    0%   { background-position: 0% 50%; }
-    50%  { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+.project-card:hover .project-art-bg {
+    transform: scale(1.04);
 }
 
 .project-art-canteen .project-art-bg {
@@ -1055,6 +1058,12 @@ h1, h2, h3, h4, h5, h6 {
     align-items: flex-start;
     justify-content: space-between;
     gap: 10px;
+}
+
+.project-header-stacked {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
 }
 
 .project-title {
@@ -2021,4 +2030,107 @@ a.contact-info-row:hover {
         padding: 8px 14px;
         font-size: 0.8rem;
     }
+}
+
+/* =============================================
+   RESUME PASSWORD NOTIFICATION DIALOG
+   ============================================= */
+.resume-dialog-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(8, 9, 14, 0.82);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.resume-dialog-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.resume-dialog-card {
+    position: relative;
+    max-width: 480px;
+    width: 100%;
+    background: rgba(18, 20, 29, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-lg);
+    padding: 34px 28px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 40px rgba(230, 57, 70, 0.15);
+    text-align: center;
+    transform: scale(0.92) translateY(12px);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.resume-dialog-overlay.active .resume-dialog-card {
+    transform: scale(1) translateY(0);
+}
+
+.resume-dialog-x {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.resume-dialog-x:hover {
+    background: rgba(230, 57, 70, 0.15);
+    border-color: rgba(230, 57, 70, 0.4);
+    color: var(--red);
+}
+
+.resume-dialog-icon-wrap {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: rgba(230, 57, 70, 0.12);
+    border: 1px solid rgba(230, 57, 70, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--red);
+    font-size: 1.45rem;
+    box-shadow: 0 0 24px rgba(230, 57, 70, 0.2);
+}
+
+.resume-dialog-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 10px;
+}
+
+.resume-dialog-desc {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+    margin-bottom: 24px;
+}
+
+.resume-dialog-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
 }
